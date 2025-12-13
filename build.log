@@ -1,0 +1,54 @@
+[main] 正在生成文件夹: d:/win11/desktop/Yus_cipher/build 
+[main] 缺少包含 CMake 缓存的文件夹。将重新生成缓存。
+[main] 正在配置项目: Yus_cipher 
+[proc] 正在执行命令: "C:\Program Files\CMake\bin\cmake.EXE" -DCMAKE_BUILD_TYPE:STRING=Debug -DOPENSSL_ROOT_DIR:STRING=d:/win11/desktop/Yus_cipher/plugins/openssl -DGMP_ROOT_DIR:STRING=d:/win11/desktop/Yus_cipher/plugins/GMP -DMPFR_ROOT_DIR:STRING=d:/win11/desktop/Yus_cipher/plugins/mpfr -DHELIB_ROOT_DIR:STRING=d:/win11/desktop/Yus_cipher/plugins/HElib -DSEAL_ROOT_DIR:STRING=d:/win11/desktop/Yus_cipher/plugins/SEAL -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE -DCMAKE_C_COMPILER:FILEPATH=C:\msys64\ucrt64\bin\gcc.exe -DCMAKE_CXX_COMPILER:FILEPATH=C:\msys64\ucrt64\bin\g++.exe --no-warn-unused-cli -S D:/win11/desktop/Yus_cipher -B d:/win11/desktop/Yus_cipher/build -G "MinGW Makefiles"
+[cmake] Not searching for unused variables given on the command line.
+[cmake] -- The CXX compiler identification is GNU 15.2.0
+[cmake] -- Detecting CXX compiler ABI info
+[cmake] -- Detecting CXX compiler ABI info - done
+[cmake] -- Check for working CXX compiler: C:/msys64/ucrt64/bin/g++.exe - skipped
+[cmake] -- Detecting CXX compile features
+[cmake] -- Detecting CXX compile features - done
+[cmake] -- Found OpenMP_CXX: -fopenmp (found version "4.5")
+[cmake] -- Found OpenMP: TRUE (found version "4.5")
+[cmake] -- 找到OpenMP: 4.5
+[cmake] -- 找到HElib库
+[cmake] -- 找到SEAL库: libseal-4.1.a
+[cmake] -- 启用测试
+[cmake] -- ========================================
+[cmake] -- 配置摘要:
+[cmake] --   项目: yus-cipher 1.0
+[cmake] --   编译器: C:/msys64/ucrt64/bin/g++.exe
+[cmake] --   构建类型: Debug
+[cmake] --   C++标准: 17
+[cmake] --   启用测试: ON
+[cmake] --   启用FHE: ON
+[cmake] --   启用OpenMP: TRUE
+[cmake] --   OpenMP版本: 4.5
+[cmake] -- ========================================
+[cmake] -- Configuring done (3.5s)
+[cmake] -- Generating done (0.1s)
+[cmake] -- Build files have been written to: D:/win11/desktop/Yus_cipher/build
+[build] 正在启动生成
+[proc] 正在执行命令: "C:\Program Files\CMake\bin\cmake.EXE" --build d:/win11/desktop/Yus_cipher/build --config Debug --target all -j 16 --
+[build] [  6%] Building CXX object CMakeFiles/yus.dir/src/sbox.cpp.obj
+[build] [ 12%] Building CXX object CMakeFiles/yus.dir/src/linear_layer.cpp.obj
+[build] [ 18%] Building CXX object CMakeFiles/yus.dir/src/round_key.cpp.obj
+[build] [ 25%] Building CXX object CMakeFiles/yus.dir/src/yus_core.cpp.obj
+[build] [ 31%] Building CXX object CMakeFiles/yus.dir/src/utils.cpp.obj
+[build] [ 37%] Building CXX object CMakeFiles/yus.dir/src/fhe_wrapper.cpp.obj
+[build] [ 43%] Linking CXX static library libyus.a
+[build] [ 43%] Built target yus
+[build] [ 50%] Building CXX object CMakeFiles/yus_example.dir/examples/yus_demo.cpp.obj
+[build] [ 62%] Building CXX object CMakeFiles/yus_test.dir/tests/test_linear_layer.cpp.obj
+[build] [ 62%] Building CXX object CMakeFiles/yus_test.dir/tests/test_sbox.cpp.obj
+[build] [ 68%] Building CXX object CMakeFiles/yus_test.dir/tests/test_round_key.cpp.obj
+[build] [ 75%] Building CXX object CMakeFiles/yus_test.dir/tests/test_yus_core.cpp.obj
+[build] [ 81%] Building CXX object CMakeFiles/yus_test.dir/tests/test_main.cpp.obj
+[build] [ 87%] Building CXX object CMakeFiles/yus_test.dir/tests/test_fhe.cpp.obj
+[build] [ 93%] Linking CXX executable yus_test.exe
+[build] [100%] Linking CXX executable yus_example.exe
+[build] [100%] Built target yus_test
+[build] [100%] Built target yus_example
+[driver] 生成完毕: 00:00:11.767
+[build] 生成已完成，退出代码为 0

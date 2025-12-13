@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YuS Cipher - FHE-friendly Stream Cipher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header .subtitle {
+            font-size: 1.25rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .header .meta {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: var(--bg-secondary);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 3rem 0;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin: 2rem 0 1rem 0;
+            color: var(--text-primary);
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .card h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .card .icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            white-space: pre-wrap;
+        }
+
+        .code-block .comment {
+            color: #64748b;
+        }
+
+        .code-block .keyword {
+            color: #60a5fa;
+        }
+
+        .code-block .string {
+            color: #34d399;
+        }
+
+        /* Performance Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric .label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Features List */
+        .features-list {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .features-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .features-list .check {
+            color: var(--success-color);
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Download Section */
+        .download-section {
+            background: var(--bg-secondary);
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 0 1rem;
+        }
+
+        .download-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text-primary);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer p {
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>YuS Cipher</h1>
+            <p class="subtitle">A FHE-friendly Stream Cipher Based on New Quadratic Permutations</p>
+            <div class="meta">
+                <i class="fas fa-university"></i> Based on IEEE Transactions on Information Theory Paper
+                <span style="margin: 0 1rem;">•</span>
+                <i class="fas fa-code"></i> C++17 Implementation
+                <span style="margin: 0 1rem;">•</span>
+                <i class="fas fa-shield-alt"></i> 128-bit Security Level
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <ul class="nav-links">
+                    <li><a href="#overview">概述</a></li>
+                    <li><a href="#features">特性</a></li>
+                    <li><a href="#architecture">架构</a></li>
+                    <li><a href="#performance">性能</a></li>
+                    <li><a href="#usage">使用</a></li>
+                    <li><a href="#download">下载</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Overview Section -->
+            <section id="overview" class="section">
+                <h2><i class="fas fa-eye"></i> 项目概述</h2>
+                <p>YuS Cipher 是一个基于论文 "YuS: A FHE-friendly Stream Cipher Based on New Quadratic Permutations" 实现的高级流密码系统。该密码专为同态加密（FHE）环境设计，具有低乘法深度和高效的性能特点。</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <div class="icon"><i class="fas fa-lock"></i></div>
+                        <h4>同态加密友好</h4>
+                        <p>专为BGV/BFV同态加密方案优化，支持128位安全级别，8192多项式度，适合在加密数据上直接计算。</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon"><i class="fas fa-tachometer-alt"></i></div>
+                        <h4>高效FHE性能</h4>
+                        <p>在实际测试中实现3.13 KiB/s的同态加密吞吐量，评估时间仅需15毫秒，内存使用峰值34MB。</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                        <h4>高安全性</h4>
+                        <p>基于新型二次排列，提供128位安全级别，通过16项单元测试验证，确保密码学安全性。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="section">
+                <h2><i class="fas fa-star"></i> 核心特性</h2>
+                
+                <h3>密码学特性</h3>
+                <ul class="features-list">
+                    <li><i class="fas fa-check check"></i> 基于F_p域新型二次排列（p ≡ 2 mod 3）</li>
+                    <li><i class="fas fa-check check"></i> 差分均匀性为 p^(n-1)，抵抗差分攻击</li>
+                    <li><i class="fas fa-check check"></i> Walsh谱有界，抵抗线性攻击</li>
+                    <li><i class="fas fa-check check"></i> 抵抗Gröbner基和XL代数攻击</li>
+                    <li><i class="fas fa-check check"></i> SPN结构，12个并行S-box</li>
+                    <li><i class="fas fa-check check"></i> 固定线性映射，避免随机矩阵开销</li>
+                </ul>
+
+                <h3>实现特性</h3>
+                <ul class="features-list">
+                    <li><i class="fas fa-check check"></i> C++17标准实现，跨平台兼容</li>
+                    <li><i class="fas fa-check check"></i> 模块化架构，易于扩展和维护</li>
+                    <li><i class="fas fa-check check"></i> 支持HElib(BGV)和SEAL(BFV)双方案</li>
+                    <li><i class="fas fa-check check"></i> 全面的单元测试和集成测试</li>
+                    <li><i class="fas fa-check check"></i> 详细的性能基准测试</li>
+                    <li><i class="fas fa-check check"></i> 命令行工具和编程接口</li>
+                </ul>
+            </section>
+
+            <!-- Architecture Section -->
+            <section id="architecture" class="section">
+                <h2><i class="fas fa-sitemap"></i> 系统架构</h2>
+                
+                <h3>核心组件</h3>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>YuSCipher</h4>
+                        <p>主密码类，提供加密/解密接口，支持36字节密钥和可配置安全级别。</p>
+                    </div>
+                    <div class="card">
+                        <h4>QuadraticPermutation</h4>
+                        <p>二次排列实现，提供S-box功能和密码学性质验证。</p>
+                    </div>
+                    <div class="card">
+                        <h4>SPNStructure</h4>
+                        <p>替代-置换网络结构，包含12个并行S-box和固定线性映射。</p>
+                    </div>
+                    <div class="card">
+                        <h4>FHEWrapper</h4>
+                        <p>同态加密包装器，支持BGV和BFV双方案，提供统一的FHE接口。</p>
+                    </div>
+                </div>
+
+                <h3>代码示例</h3>
+                <div class="code-block">
+                    <span class="comment">// 基本使用示例</span>
+                    <span class="keyword">#include</span> <span class="string">"yus/yus_core.h"</span>
+                    <span class="keyword">#include</span> <span class="string">"yus/fhe_wrapper.h"</span>
+                    
+                    <span class="keyword">int</span> <span class="keyword">main</span>() {
+                        <span class="comment">// 初始化YuS Cipher</span>
+                        YuSCipher cipher;
+                        std::vector&lt;uint8_t&gt; key(36, 0xAB); <span class="comment">// 36字节密钥</span>
+                        cipher.initialize(key);
+                        
+                        <span class="comment">// 初始化FHE包装器</span>
+                        FHEWrapper fhe_wrapper;
+                        FHEParams params = {128, 8192, 300, FHE_SCHEME::BFV};
+                        fhe_wrapper.initialize(params);
+                        
+                        <span class="comment">// 加密数据</span>
+                        std::vector&lt;uint8_t&gt; plaintext = {0x01, 0x02, 0x03};
+                        std::vector&lt;uint8_t&gt; ciphertext = cipher.encrypt(plaintext);
+                        
+                        <span class="keyword">return</span> 0;
+                    }
+                </div>
+            </section>
+
+            <!-- Performance Section -->
+            <section id="performance" class="section">
+                <h2><i class="fas fa-chart-line"></i> 性能指标</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="value">3.13</div>
+                        <div class="label">KiB/s FHE吞吐量</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">128</div>
+                        <div class="label">位安全级别</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">36</div>
+                        <div class="label">字节密钥长度</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">24</div>
+                        <div class="label">密钥流元素</div>
+                    </div>
+                </div>
+
+                <h3>实际测试结果</h3>
+                <p>基于实际运行测试的性能数据（优化后配置）：</p>
+                
+                <div class="code-block">
+                    === YuS Cipher Demo 测试结果 ===
+                    [STAGE 1] Generating prime p...
+                    [SUCCESS] Generated prime p: 76991
+                    [STAGE 6] Generating keystream...
+                    [SUCCESS] Generated keystream with 24 elements
+                    [FHE] Starting homomorphic evaluation...
+                    [FHE PARAMS] Security Level: 128, Poly Degree: 8192, Cipher Bits: 300
+                    [RESULTS] Evaluation time: 14.995 ms
+                    [RESULTS] Throughput: 3.12604 KiB/s
+                    [MEMORY] Peak memory usage: 34 MB
+                    [SUCCESS] Program completed successfully
+                </div>
+
+                <h3>FHE性能测试</h3>
+                <div class="metrics-grid">
+                    <div class="metric">
+                        <div class="value">15.0</div>
+                        <div class="label">ms 评估时间</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">34</div>
+                        <div class="label">MB 峰值内存</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">8192</div>
+                        <div class="label">多项式度</div>
+                    </div>
+                    <div class="metric">
+                        <div class="value">300</div>
+                        <div class="label">密文位数</div>
+                    </div>
+                </div>
+
+                <h3>单元测试结果</h3>
+                <div class="code-block">
+                    === YuS Cipher FHE 测试套件 ===
+                    [==========] Running 16 tests from 5 test suites
+                    [----------] 5 tests from FHEWrapperTest
+                    [       OK ] FHEWrapperTest.InitBGV (224 ms)
+                    [       OK ] FHEWrapperTest.InitBFV (13 ms)
+                    [       OK ] FHEWrapperTest.EncryptDecryptBGV (215 ms)
+                    [       OK ] FHEWrapperTest.EncryptDecryptBFV (14 ms)
+                    [       OK ] FHEWrapperTest.MemoryTest
+                    [==========] 16 tests from 5 test suites ran.
+                    [  PASSED  ] 16 tests.
+                </div>
+
+                <h3>性能优化历程</h3>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>初始配置</h4>
+                        <p>安全级别: 80位多项式度: 4096吞吐量: 9.3 KiB/s内存: 15MB</p>
+                    </div>
+                    <div class="card">
+                        <h4>安全升级</h4>
+                        <p>安全级别: 128位多项式度: 8192吞吐量: 3.13 KiB/s内存: 35MB</p>
+                    </div>
+                    <div class="card">
+                        <h4>优化完成</h4>
+                        <p>安全级别: 128位多项式度: 8192吞吐量: 3.13 KiB/s内存: 34MB</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Usage Section -->
+            <section id="usage" class="section">
+                <h2><i class="fas fa-terminal"></i> 使用方法</h2>
+                
+                <h3>命令行工具</h3>
+                <div class="code-block">
+                    <span class="comment"># 构建项目 (Windows)</span>
+                    mkdir build && cd build
+                    cmake .. -DCMAKE_BUILD_TYPE=Release
+                    cmake --build . --config Release
+                    
+                    <span class="comment"># 运行演示程序</span>
+                    ./yus_example.exe
+                    
+                    <span class="comment"># 运行测试套件</span>
+                    ./yus_test.exe
+                    
+                    <span class="comment"># 查看测试结果</span>
+                    <span class="comment"># yus_example.exe 输出详细的FHE性能指标</span>
+                    <span class="comment"># yus_test.exe 运行16个测试验证功能正确性</span>
+                </div>
+
+                <h3>CMake配置</h3>
+                <div class="code-block">
+                    <span class="comment"># CMakeLists.txt 关键配置</span>
+                    cmake_minimum_required(VERSION 3.15)
+                    project(yus_cipher VERSION 1.1.0)
+                    
+                    <span class="comment"># 设置C++标准</span>
+                    set(CMAKE_CXX_STANDARD 17)
+                    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+                    
+                    <span class="comment"># 添加依赖库</span>
+                    find_package(HElib REQUIRED)
+                    find_package(SEAL REQUIRED)
+                    find_package(GTest REQUIRED)
+                    
+                    <span class="comment"># 构建主库</span>
+                    add_library(yus STATIC src/yus_core.cpp src/fhe_wrapper.cpp)
+                    target_link_libraries(yus PRIVATE HElib::helib SEAL::seal)
+                </div>
+
+                <h3>FHE参数配置</h3>
+                <div class="code-block">
+                    <span class="comment">// 当前最优参数配置</span>
+                    FHEParams fhe_params;
+                    fhe_params.security_level = 128;           <span class="comment">// 128位安全级别</span>
+                    fhe_params.poly_modulus_degree = 8192;     <span class="comment">// 8192多项式度</span>
+                    fhe_params.cipher_modulus_bits = 300;      <span class="comment">// 300位密文模数</span>
+                    fhe_params.scheme = FHE_SCHEME::BFV;       <span class="comment">// 使用BFV方案</span>
+                    
+                    <span class="comment">// 初始化FHE包装器</span>
+                    FHEWrapper fhe_wrapper;
+                    fhe_wrapper.initialize(fhe_params);
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section id="download" class="download-section">
+                <div class="container">
+                    <h2><i class="fas fa-download"></i> 获取项目</h2>
+                    <p>完整的项目源代码、文档和测试套件</p>
+                    
+                    <div style="margin-top: 2rem;">
+                        <a href="#" class="download-btn" onclick="downloadProject()">
+                            <i class="fas fa-code"></i>
+                            下载源代码
+                        </a>
+                        <a href="#" class="download-btn" onclick="downloadDocs()">
+                            <i class="fas fa-file-pdf"></i>
+                            技术文档
+                        </a>
+                    </div>
+                    
+                    <div style="margin-top: 2rem; color: var(--text-secondary);">
+                        <p><strong>最新版本:</strong> v1.1.0</p>
+                        <p><strong>主要更新:</strong> 安全级别提升至128位，性能优化，参数调优</p>
+                        <p><strong>测试状态:</strong> 16项测试全部通过，性能基准测试完成</p>
+                        <p><strong>依赖库:</strong> HElib, SEAL, GMP, MPFR, Google Test</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>YuS Cipher - A FHE-friendly Stream Cipher</p>
+            <p>基于 IEEE Transactions on Information Theory 论文实现</p>
+            <p>© 2025 YuS Cipher Project. 保留所有权利。</p>
+            <p>项目地址: <a href="https://github.com/Aurorp1g/Yus_cipher">Yus_cipher</a></p>
+        </div>
+    </footer>
+
+    <script>
+        function downloadProject() {
+            //alert('项目源代码下载功能即将上线');
+            window.open('https://github.com/Aurorp1g/Yus_cipher', '_blank');
+        }
+        
+        function downloadDocs() {
+            //alert('技术文档下载功能即将上线');
+            window.open('https://github.com/Aurorp1g/Yus_cipher/tree/master/docs', '_blank');
+        }
+    </script>
+</body>
+</html>
