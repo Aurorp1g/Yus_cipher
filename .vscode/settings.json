@@ -97,5 +97,18 @@
         "variant": "cpp",
         "span": "cpp",
         "span_ext": "cpp"
+    },
+  "terminal.integrated.defaultProfile.windows": "bash (MSYS2)",
+  "terminal.integrated.profiles.windows": {
+    "bash (MSYS2)": {
+      "path": "C:\\msys64\\msys2_shell.cmd",
+      "args": [
+        "-defterm",
+        "-here",
+        "-no-start",
+        "-ucrt64"
+      ],
+      "icon": "terminal-bash"
     }
+  }
 }
